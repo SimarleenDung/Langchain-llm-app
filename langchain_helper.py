@@ -10,7 +10,11 @@ load_dotenv()  # loads GOOGLE_API_KEY from .env
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
 
 
-def generate_cafe_name_and_items(cuisine):
+def generate_cafe_name_and_items(cuisine, vibe="cozy"):
+    """
+    Generate a fancy cafe name and a list of menu items
+    based on the given cuisine and vibe.
+    """
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
 
     # Chain for cafe name
@@ -28,15 +32,10 @@ def generate_cafe_name_and_items(cuisine):
     food_items_chain = LLMChain(llm=llm, prompt=prompt_template_items, output_key="menu_items")
 
     # Run the chains
-    cafe_name = name_chain.run({"cuisine": cuisine, "vibe": "cozy"})
+    cafe_name = name_chain.run({"cuisine": cuisine, "vibe": vibe if vibe else "cozy"})
     menu_items = food_items_chain.run({"cafe_name": cafe_name})
 
-    # Ensure menu_items is a list
-    menu_items = re.split(r",\s*", menu_items.strip())
+    # Convert string to list
+    menu_items = [item.strip() for item in menu_items.split(",")]
 
-    response = {"cafe_name": cafe_name, "menu_items": menu_items}
-    return response
-
-
-if __name__ == "__main__":
-    print(generate_cafe_name_and_items("Mexican"))
+    return {"cafe_name": cafe_name, "menu_items": menu_items}
